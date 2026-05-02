@@ -1,17 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+export const maxDuration = 60;
 
 export async function POST(req) {
   try {
-    const { rosterInfo, todayMatchups, playingToday, today, todayDisplay } = await req.json()
+    const { rosterInfo, todayMatchups, playingToday, today, todayDisplay } =
+      await req.json();
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      messages: [{
-        role: 'user',
-        content: `You are a top ESPN fantasy baseball analyst for a categories league.
+    const prompt = `You are a top ESPN fantasy baseball analyst for a categories league.
 
 CATEGORIES: Hitting: R, HR, RBI, SB, AVG, OPS | Pitching: K, QS, ERA, WHIP, K/BB (key=KBB), SV+HD (key=SVHD)
 
@@ -21,7 +15,7 @@ USER'S ROSTER WITH REAL STATS (season + last 14 days):
 ${JSON.stringify(rosterInfo, null, 2)}
 
 PLAYERS PLAYING TODAY: ${playingToday.join(', ') || 'None detected'}
-TODAY'S MATCHUPS: ${todayMatchups.map(g => `${g.away} @ ${g.home}`).join(' | ') || 'None detected'}
+TODAY'S MATCHUPS: ${todayMatchups.map((g) => `${g.away} @ ${g.home}`).join(' | ') || 'None detected'}
 
 Reply ONLY with valid JSON (no markdown, no preamble):
 {
@@ -44,15 +38,37 @@ Rules:
 - Use REAL 2026 MLB players NOT already on user roster
 - hot:true only if genuinely on a tear in last 14 days
 - ownPct realistic 5-45% range (these are waiver wire guys)
-- "why" must mention specific stats or matchup details`
-      }],
-    })
+- "why" must mention specific stats or matchup details`;
 
-    const raw = message.content[0].text
-    const result = JSON.parse(raw.replace(/```json|```/g, '').trim())
-    return Response.json({ ok: true, result })
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Anthropic API error:', response.status, errText);
+      return Response.json(
+        { ok: false, error: `Anthropic ${response.status}: ${errText}` },
+        { status: 500 }
+      );
+    }
+
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '{}';
+    const result = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    return Response.json({ ok: true, result });
   } catch (err) {
-    console.error('Analyze error:', err)
-    return Response.json({ ok: false, error: err.message }, { status: 500 })
+    console.error('Analyze error:', err);
+    return Response.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
