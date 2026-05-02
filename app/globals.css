@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  background: #070b14;
+  color: #e2e8f0;
+  font-family: 'Barlow Condensed', sans-serif;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+/* Hide scrollbars but keep scroll */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* Input reset */
+input, button, select, textarea {
+  font-family: inherit;
+  -webkit-appearance: none;
+}
+
+/* Bottom nav safe area */
+.bottom-nav {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* Header safe area */
+.header-safe {
+  padding-top: max(14px, env(safe-area-inset-top));
+}
+
+/* Slot animations */
+.slot-enter {
+  animation: slotIn 0.15s ease;
+}
+@keyframes slotIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Spinner */
+.spin {
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Category bar animation */
+.bar-fill {
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pull-to-refresh feel */
+.content-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* Active press states for mobile */
+.pressable:active {
+  transform: scale(0.97);
+  transition: transform 0.08s;
+}
+
+/* Dropdown scroll */
+.dropdown-scroll {
+  max-height: 55vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Analyzing pulse */
+.pulse-green {
+  animation: pulseGreen 1.2s ease-in-out infinite;
+}
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
+
+/* Save indicator */
+.save-flash {
+  animation: saveFlash 0.4s ease;
+}
+@keyframes saveFlash {
+  0%   { color: #22c55e; }
+  100% { color: #475569; }
+}
